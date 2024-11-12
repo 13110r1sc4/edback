@@ -7,23 +7,29 @@ class Portfolio:
     def __init__(self, bars, events, start_date, initial_capital=100000.0):
         self.bars = bars
         self.events = events
-        self.symbol_list = self.bars.symbol_list
+        self.symbol_tuple = self.bars.symbol_tuple
         self.start_date = start_date
         self.initial_capital = initial_capital
-
+        self.multiasset = bars.multiasset
         self.all_positions = self.construct_all_positions()
-        self.current_positions = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        self.current_positions = {t: {s: 0 for s in t} for t in self.symbol_tuple} if self.multiasset else {s: 0 for s in self.symbol_tuple}
 
         self.all_holdings = self.construct_all_holdings()
         self.current_holdings = self.construct_current_holdings()
 
     def construct_all_positions(self):
-        d = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        if self.multiasset:
+            d = {t: {s: 0 for s in t} for t in self.symbol_tuple}
+        else:
+            d = {s: 0 for s in self.symbol_tuple}
         d['datetime'] = self.start_date
         return [d]
 
     def construct_all_holdings(self):
-        d = dict( (k,v) for k, v in [(s, 0.0) for s in self.symbol_list] )
+        if self.multiasset:
+            d = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
+        else:
+            d = {s: 0.0 for s in self.symbol_tuple}
         d['datetime'] = self.start_date
         d['cash'] = self.initial_capital
         d['commission'] = 0.0
@@ -31,30 +37,33 @@ class Portfolio:
         return [d]
 
     def construct_current_holdings(self):
-        d = dict( (k,v) for k, v in [(s, 0.0) for s in self.symbol_list] )
+        if self.multiasset:
+            d = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
+        else:
+            d = {s: 0.0 for s in self.symbol_tuple}
         d['cash'] = self.initial_capital
         d['commission'] = 0.0
         d['total'] = self.initial_capital
         return d
 
     def update_timeindex(self, event):
-        latest_datetime = self.bars.get_latest_bars(self.symbol_list[0])[0][1]
+        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0][1]
 
-        dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_tuple] )
         dp['datetime'] = latest_datetime
 
-        for s in self.symbol_list:
+        for s in self.symbol_tuple:
             dp[s] = self.current_positions[s]
 
         self.all_positions.append(dp)
 
-        dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_tuple] )
         dh['datetime'] = latest_datetime
         dh['cash'] = self.current_holdings['cash']
         dh['commission'] = self.current_holdings['commission']
         dh['total'] = self.current_holdings['cash']
 
-        for s in self.symbol_list:
+        for s in self.symbol_tuple:
             market_value = self.current_positions[s] * self.bars.get_latest_bars(s)[0][5]
             dh[s] = market_value
             dh['total'] += market_value
