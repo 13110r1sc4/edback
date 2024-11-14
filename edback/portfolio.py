@@ -49,15 +49,15 @@ class Portfolio:
     def update_timeindex(self, event):
         latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0][1]
 
-        dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_tuple] )
+        dp = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
         dp['datetime'] = latest_datetime
 
-        for s in self.symbol_tuple:
+        for s in self.symbol_tuple: # ?
             dp[s] = self.current_positions[s]
 
         self.all_positions.append(dp)
 
-        dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_tuple] )
+        dh = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
         dh['datetime'] = latest_datetime
         dh['cash'] = self.current_holdings['cash']
         dh['commission'] = self.current_holdings['commission']
