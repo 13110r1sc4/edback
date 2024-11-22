@@ -149,25 +149,25 @@ class HistoricCSVDataHandler(DataHandler):
     def update_bars(self):
         
         for s in self.symbol_tuple:
-            if self.multiasset:
-                self.symbol_data[s] = pd.DataFrame()
+            # if self.multiasset:
+                # self.symbol_data[s] = pd.DataFrame()
 
-                for i in self.symbol_tuple[s]:
-                    try:
-                        bar = next(self._get_new_bar(i))
-                    except StopIteration:
-                        self.continue_backtest = False
-                    else:
-                        if bar is not None:
-                            self.latest_symbol_data[i].append(bar)
+                # for i in self.symbol_tuple[s]:
+                #     try:
+                #         bar = next(self._get_new_bar(i))
+                #     except StopIteration:
+                #         self.continue_backtest = False
+                #     else:
+                #         if bar is not None:
+                #             self.latest_symbol_data[i].append(bar)
                 
-            else:
+            # else:
 
-                try:
-                    bar = next(self._get_new_bar(s))
-                except StopIteration:
-                    self.continue_backtest = False
-                else:
-                    if bar is not None:
-                        self.latest_symbol_data[s].append(bar)
-            self.events.put(MarketEvent())
+            try:
+                bar = next(self._get_new_bar(s))
+            except StopIteration:
+                self.continue_backtest = False
+            else:
+                if bar is not None:
+                    self.latest_symbol_data[s].append(bar)
+        self.events.put(MarketEvent())
