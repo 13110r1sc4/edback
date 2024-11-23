@@ -88,9 +88,7 @@ class HistoricCSVDataHandler(DataHandler):
 
                     self.symbol_data[s] = self.symbol_data[s].iterrows()
                         
-
             else:
-
                 self.symbol_data[s] = pd.read_csv(
                     os.path.join(self.csv_dir, f'{self.interval}/{s}.csv'),
                     header=0, index_col=0, parse_dates=True,
@@ -105,11 +103,11 @@ class HistoricCSVDataHandler(DataHandler):
                     comb_index = comb_index.union(self.symbol_data[s].index)
                 self.latest_symbol_data[s] = []
 
-        # use combindex to adjust dates and forward-fill missing data
         for s in self.symbol_tuple:
-            self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
-            self.symbol_data[s]["returns"] = self.symbol_data[s]["close"].pct_change().dropna()
-            self.symbol_data[s] = self.symbol_data[s].iterrows()
+                # use combindex to adjust dates and forward-fill missing data
+                self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
+                self.symbol_data[s]["returns"] = self.symbol_data[s]["close"].pct_change().dropna()
+                self.symbol_data[s] = self.symbol_data[s].iterrows()
     
 
     def _get_new_bar(self, symbol):
@@ -122,15 +120,15 @@ class HistoricCSVDataHandler(DataHandler):
 
             if self.multiasset:
                 if not isinstance(symbol, list):
-                    print("Method argument 'symbol' has to be a list when there are multiple assets")
+                    print("Method argument 'symbol' has to be a tuple when there are multiple assets")
                 else:
-                    yield tuple([symbol[sym] for sym in symbol] + [b[0]] + [b[1][f'{tckr}_close'] for tckr in symbol])
+                    yield tuple([b[0]]+ [symbol[sym] for sym in symbol] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
 
             else:
                 if not isinstance(symbol, str):
                     print("Method argument 'symbol' has to be a str when single asset")
                 else:
-                    yield tuple([symbol, b[0], b[1]['close'],])
+                    yield tuple([b[0], symbol, b[1]['close']])
 
     def get_latest_bars(self, symbol, N=1):
         '''
@@ -149,20 +147,6 @@ class HistoricCSVDataHandler(DataHandler):
     def update_bars(self):
         
         for s in self.symbol_tuple:
-            # if self.multiasset:
-                # self.symbol_data[s] = pd.DataFrame()
-
-                # for i in self.symbol_tuple[s]:
-                #     try:
-                #         bar = next(self._get_new_bar(i))
-                #     except StopIteration:
-                #         self.continue_backtest = False
-                #     else:
-                #         if bar is not None:
-                #             self.latest_symbol_data[i].append(bar)
-                
-            # else:
-
             try:
                 bar = next(self._get_new_bar(s))
             except StopIteration:

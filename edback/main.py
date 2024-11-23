@@ -10,7 +10,7 @@ def main():
     ########### GENERAL ###########
     events       = queue.Queue()
     symbol_tuple = ("AAPL", "MSFT", "GOOGL") # HAS TO BE TUPLE FOR DATA HANDLING
-    csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/ClaudeAI_test/data/"
+    csv_dir      = "/Users/"
 
     ############# YF ##############
     intervals   = ["90m"]

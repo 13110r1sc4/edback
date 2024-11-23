@@ -48,7 +48,7 @@ class MovingAverageCrossoverStrategy(Strategy):
 
 class AdjPairTrade(Strategy):
     def __init__(self, bars, events, model_window):
-        external_path = os.path.abspath('/Users/leonardorisca/Desktop/AT/strats/CCSS')
+        external_path = os.path.abspath('/Users/CCSS')
         sys.path.append(external_path)
         from model import CCSS
         self.bars = bars

@@ -47,27 +47,35 @@ class Portfolio:
         return d
 
     def update_timeindex(self, event):
-        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0][1]
+        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0]
 
-        dp = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
+        if self.multiasset:
+            dp, dh = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
+        else:
+            dp, dh = {s: 0.0 for s in self.symbol_tuple}
+
         dp['datetime'] = latest_datetime
-
-        for s in self.symbol_tuple: # ?
-            dp[s] = self.current_positions[s]
-
-        self.all_positions.append(dp)
-
-        dh = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
         dh['datetime'] = latest_datetime
         dh['cash'] = self.current_holdings['cash']
         dh['commission'] = self.current_holdings['commission']
         dh['total'] = self.current_holdings['cash']
 
         for s in self.symbol_tuple:
-            market_value = self.current_positions[s] * self.bars.get_latest_bars(s)[0][5]
-            dh[s] = market_value
-            dh['total'] += market_value
+            if self.multiasset:
+                for t,i  in enumerate(s):
+                    dp[s][t] = self.current_positions[s][t]
 
+                    market_value = self.current_positions[s][t] * self.bars.get_latest_bars(s)[3+i] # [0][5] ? 
+                    dh[s][t] = market_value
+                    dh['total'] += market_value
+            else:
+                dp[s] = self.current_positions[s]
+
+                market_value = self.current_positions[s] * self.bars.get_latest_bars(s)[2]
+                dh[s] = market_value
+                dh['total'] += market_value
+
+        self.all_positions.append(dp)
         self.all_holdings.append(dh)
 
     def update_positions_from_fill(self, fill):
