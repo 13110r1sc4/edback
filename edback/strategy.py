@@ -100,7 +100,7 @@ class AdjPairTrade(Strategy):
                                 for _ in range(2):
                                     if self.bought[symbol] == 'SHORT':
                                         self.bought[symbol][_] = 'LONG'
-                                # NOT EMISSING SIGNAL TO PERFORM THE SAME ACTION
+                                
 
                     elif specific[0] < 0 and specific[1] < 0:
                         if self.bought[symbol] == ["OUT", "OUT"]:
@@ -113,7 +113,7 @@ class AdjPairTrade(Strategy):
                                 for _ in range(2):
                                     if self.bought[symbol] == 'LONG':
                                         self.bought[symbol][_] = 'SHORT'
-                                # NOT EMISSING SIGNAL TO PERFORM THE SAME ACTION
+                               
 
                     elif specific[0] > 0 and specific[1] < 0:
                             
