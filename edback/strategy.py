@@ -46,7 +46,9 @@ class MovingAverageCrossoverStrategy(Strategy):
                         self.events.put(signal)
                         self.bought[symbol] = 'OUT'
 
-class AdjPairTrade(Strategy):
+class NotAPairTrade(Strategy):
+    #### DEF: 
+    #### Use specifics only from ccss and only do what they say
     def __init__(self, bars, events, model_window):
         external_path = os.path.abspath('/Users/CCSS')
         sys.path.append(external_path)
@@ -61,10 +63,9 @@ class AdjPairTrade(Strategy):
     def _calculate_initial_bought(self):
         bought = {}
         for ma in self.symbol_tuple:
-            key = "||".join(ma)
-            bought[key] = {}
+            bought[ma] = {}
             for s in ma:
-                bought[key][s] = ['OUT', 'OUT']
+                bought[ma][s] = 'OUT'
         return bought
 
     def calculate_signals(self, event):
@@ -77,6 +78,8 @@ class AdjPairTrade(Strategy):
                     specific = ccss.predict().specific()
 
                     dt = bars[-1][1]
+
+                    #---------------------------------------
                     # if spread_pred > spread_actual and self.bought[symbol] == ["OUT", "OUT"]:
                     #     sig_dir = 'LONG'
                     #     signal = SignalEvent(symbol, dt, sig_dir)
@@ -89,6 +92,13 @@ class AdjPairTrade(Strategy):
                     #     self.bought[symbol] = 'OUT'
 
                     # ADD LOGIC TO SEE IF SPEC IS SIGNIFICANT + USE EXIT
+                    #---------------------------------------
+
+                    # signal = SignalEvent(symbol, dt, sig_dir) ???
+                    for asset in symbol:
+
+                        if self.bought[symbol][asset] == # signal
+
                     if specific[0] > 0 and specific[1] > 0:
                         if self.bought[symbol] == ["OUT", "OUT"]:
                             sig_dir = ['LONG', 'LONG']
