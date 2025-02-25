@@ -1,0 +1,2 @@
+- define commission in execution
+- missing the strategy

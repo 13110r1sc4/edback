@@ -65,7 +65,7 @@ class Portfolio:
                 for t,i  in enumerate(s):
                     dp[s][t] = self.current_positions[s][t]
 
-                    market_value = self.current_positions[s][t] * self.bars.get_latest_bars(s)[3+i] # [0][5] ? 
+                    market_value = self.current_positions[s][t] * self.bars.get_latest_bars(s)[3+i] # date, tckr1, tckr2,
                     dh[s][t] = market_value
                     dh['total'] += market_value
             else:
@@ -78,7 +78,7 @@ class Portfolio:
         self.all_positions.append(dp)
         self.all_holdings.append(dh)
 
-    def update_positions_from_fill(self, fill):
+    def update_positions_from_fill(self, fill): # fill is the event FILL
         fill_dir = 0
         if fill.direction == 'BUY':
             fill_dir = 1
@@ -117,6 +117,32 @@ class Portfolio:
         cur_quantity = self.current_positions[symbol]
         order_type = 'MKT'
 
+    
+        if cur_quantity == 0:
+            if direction == 'LONG':
+                order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
+            elif direction == 'SHORT':
+                order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
+
+        elif cur_quantity < 0:
+            if direction == 'LONG':
+                order = OrderEvent(symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'BUY')
+            elif direction == 'SHORT':
+                order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
+            elif direction == 'EXIT':
+                order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
+        
+        else:
+            if direction == 'LONG':
+                order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
+            elif direction == 'SHORT':
+                order = OrderEvent(symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'SELL')
+            elif direction == 'EXIT':
+                order = OrderEvent(symbol, order_type, abs(cur_quantity), 'SHORT')
+        
+        
+        ''' was in place of the above
+
         if direction == 'LONG' and cur_quantity == 0:
             order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
         if direction == 'SHORT' and cur_quantity == 0:
@@ -126,6 +152,7 @@ class Portfolio:
             order = OrderEvent(symbol, order_type, abs(cur_quantity), 'SELL')
         if direction == 'EXIT' and cur_quantity < 0:
             order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
+        '''
 
         return order
 
