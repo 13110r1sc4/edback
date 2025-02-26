@@ -131,18 +131,14 @@ class HistoricCSVDataHandler(DataHandler):
                     yield tuple([b[0], symbol, b[1]['close']])
 
     def get_latest_bars(self, symbol, N=1):
-        '''
-        symbol (input):
-        if self.multiasset: list
-        else: str
-        '''
         try:
             bars_list = self.latest_symbol_data[symbol]
         except KeyError:
             print(f"That symbol {symbol} is not available in the historical data set.")
             return None
         else:
-            return bars_list[-N:]
+            if len(bars_list) == N:
+                return bars_list[-N:]
 
     def update_bars(self):
         

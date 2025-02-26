@@ -78,7 +78,7 @@ class Portfolio:
         self.all_positions.append(dp)
         self.all_holdings.append(dh)
 
-    def update_positions_from_fill(self, fill): # fill is the event FILL
+    def update_positions_from_fill(self, fill):
         fill_dir = 0
         if fill.direction == 'BUY':
             fill_dir = 1
@@ -160,3 +160,5 @@ class Portfolio:
         if event.type == 'SIGNAL':
             order_event = self.generate_naive_order(event)
             self.events.put(order_event)
+
+            

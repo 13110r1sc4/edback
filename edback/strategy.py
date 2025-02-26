@@ -95,10 +95,29 @@ class NotAPairTrade(Strategy):
                     #---------------------------------------
 
                     # signal = SignalEvent(symbol, dt, sig_dir) ???
-                    for asset in symbol:
+                    # for asset in symbol:
 
-                        if self.bought[symbol][asset] == # signal
+                    #     if self.bought[symbol][asset] == # signal
 
+                    sig_dir = []
+                    b = []
+                    for i, spec in enumerate(specific):
+                        if spec > 0:
+                            sig_dir.append('LONG')
+                            b.append('LONG')
+                        elif spec < 0:
+                            sig_dir.append('SHORT')
+                            b.append('SHORT')
+                        else:
+                            sig_dir.append('OUT')
+                            b.append('OUT')
+
+                    signal = SignalEvent(symbol, dt, sig_dir)
+                    self.events.put(signal)
+                    self.bought[symbol] = b
+
+                    #-------------------------------
+                    '''
                     if specific[0] > 0 and specific[1] > 0:
                         if self.bought[symbol] == ["OUT", "OUT"]:
                             sig_dir = ['LONG', 'LONG']
@@ -149,3 +168,5 @@ class NotAPairTrade(Strategy):
                         else:
                             for ind,p in enumerate(['SHORT', 'LONG']):
                                     self.bought[symbol][ind] = p
+                    
+                    '''
