@@ -13,7 +13,7 @@ class SimulatedExecutionHandler(ExecutionHandler):
         self.events = events
 
     def execute_order(self, event):
-        if event.type == 'ORDER':
+        if event.type == 'ORDER': 
 
             fill_price = event.price
             quantity = event.quantity

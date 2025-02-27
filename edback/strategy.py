@@ -99,6 +99,7 @@ class NotAPairTrade(Strategy):
 
                     #     if self.bought[symbol][asset] == # signal
 
+
                     sig_dir = []
                     b = []
                     for i, spec in enumerate(specific):

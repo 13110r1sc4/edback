@@ -1,2 +1,7 @@
 - define commission in execution
 - missing the strategy
+- portfolio to handle multiasset:
+    - modify naive_order to handle multiasset -> generate as many orders as number of assets
+    - modify update methods for multiasset
+
+- modify excetion to define direction (and other parameters)?

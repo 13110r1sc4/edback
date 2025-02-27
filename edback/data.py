@@ -113,13 +113,13 @@ class HistoricCSVDataHandler(DataHandler):
     def _get_new_bar(self, symbol):
         '''
         symbol (input):
-        if self.multiasset: list
+        if self.multiasset: tuple
         else: str
         '''
         for b in self.symbol_data[symbol]:
 
             if self.multiasset:
-                if not isinstance(symbol, list):
+                if not isinstance(symbol, tuple):
                     print("Method argument 'symbol' has to be a tuple when there are multiple assets")
                 else:
                     yield tuple([b[0]]+ [symbol[sym] for sym in symbol] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index

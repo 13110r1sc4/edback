@@ -62,15 +62,13 @@ class Portfolio:
 
         for s in self.symbol_tuple:
             if self.multiasset:
-                for t,i  in enumerate(s):
+                for i,t  in enumerate(s):
                     dp[s][t] = self.current_positions[s][t]
-
                     market_value = self.current_positions[s][t] * self.bars.get_latest_bars(s)[3+i] # date, tckr1, tckr2,
                     dh[s][t] = market_value
                     dh['total'] += market_value
             else:
                 dp[s] = self.current_positions[s]
-
                 market_value = self.current_positions[s] * self.bars.get_latest_bars(s)[2]
                 dh[s] = market_value
                 dh['total'] += market_value
@@ -79,6 +77,7 @@ class Portfolio:
         self.all_holdings.append(dh)
 
     def update_positions_from_fill(self, fill):
+        # modify to handle ma
         fill_dir = 0
         if fill.direction == 'BUY':
             fill_dir = 1
@@ -88,6 +87,7 @@ class Portfolio:
         self.current_positions[fill.symbol] += fill_dir * fill.quantity
 
     def update_holdings_from_fill(self, fill):
+        # modify to handle ma
         fill_dir = 0
         if fill.direction == 'BUY':
             fill_dir = 1
@@ -110,47 +110,48 @@ class Portfolio:
         order = None
 
         symbol = signal.symbol
-        direction = signal.signal_type
+        sig = signal.signal_type
         strength = signal.strength
 
         mkt_quantity = 100
         cur_quantity = self.current_positions[symbol]
         order_type = 'MKT'
 
-    
+        # modify this to handle multiasset -> loop through sig and do orders for each of the single asset
+        
         if cur_quantity == 0:
-            if direction == 'LONG':
+            if sig == 'LONG':
                 order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
-            elif direction == 'SHORT':
+            elif sig == 'SHORT':
                 order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
 
         elif cur_quantity < 0:
-            if direction == 'LONG':
+            if sig == 'LONG':
                 order = OrderEvent(symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'BUY')
-            elif direction == 'SHORT':
+            elif sig == 'SHORT':
                 order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
-            elif direction == 'EXIT':
+            elif sig == 'EXIT':
                 order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
         
         else:
-            if direction == 'LONG':
+            if sig == 'LONG':
                 order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
-            elif direction == 'SHORT':
+            elif sig == 'SHORT':
                 order = OrderEvent(symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'SELL')
-            elif direction == 'EXIT':
+            elif sig == 'EXIT':
                 order = OrderEvent(symbol, order_type, abs(cur_quantity), 'SHORT')
         
         
         ''' was in place of the above
 
-        if direction == 'LONG' and cur_quantity == 0:
+        if sig == 'LONG' and cur_quantity == 0:
             order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
-        if direction == 'SHORT' and cur_quantity == 0:
+        if sig == 'SHORT' and cur_quantity == 0:
             order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
 
-        if direction == 'EXIT' and cur_quantity > 0:
+        if sig == 'EXIT' and cur_quantity > 0:
             order = OrderEvent(symbol, order_type, abs(cur_quantity), 'SELL')
-        if direction == 'EXIT' and cur_quantity < 0:
+        if sig == 'EXIT' and cur_quantity < 0:
             order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
         '''
 
