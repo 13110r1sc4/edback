@@ -21,6 +21,7 @@ class SimulatedExecutionHandler(ExecutionHandler):
             # Create a FillEvent to signal that an order has been filled
             fill_event = FillEvent(
                 timeindex=event.timeindex,
+                tuple=event.tuple,
                 symbol=event.symbol,
                 quantity=quantity,
                 fill_price=fill_price,

@@ -77,14 +77,18 @@ class Portfolio:
         self.all_holdings.append(dh)
 
     def update_positions_from_fill(self, fill):
-        # modify to handle ma
+        # modify to handle ma. current pos is dict with tuple: ticker
+    
         fill_dir = 0
         if fill.direction == 'BUY':
             fill_dir = 1
         if fill.direction == 'SELL':
             fill_dir = -1
-
-        self.current_positions[fill.symbol] += fill_dir * fill.quantity
+        
+        if self.multiasset:
+            self.current_positions[fill.tuple][fill.symbol] += fill_dir * fill.quantity
+        else:
+            self.current_positions[fill.symbol] += fill_dir * fill.quantity
 
     def update_holdings_from_fill(self, fill):
         # modify to handle ma
@@ -93,10 +97,17 @@ class Portfolio:
             fill_dir = 1
         if fill.direction == 'SELL':
             fill_dir = -1
+        
+        if self.multiasset:
+            for i, tckr in enumerate(fill.tuple):
+                if fill.symbol == tckr:
+                    index = i + 1
+            fill_cost = self.bars.get_latest_bars(fill.symbol)[0][len(fill.tuple) + index]
+        else:
+            fill_cost = self.bars.get_latest_bars(fill.symbol)[0][2]
 
-        fill_cost = self.bars.get_latest_bars(fill.symbol)[0][5]
-        cost = fill_dir * fill_cost * fill.quantity
-        self.current_holdings[fill.symbol] += cost
+        cost = fill_dir * fill_cost * fill.quantity # fill_cost is close
+        self.current_holdings[fill.tuple][fill.symbol] += cost
         self.current_holdings['commission'] += fill.commission
         self.current_holdings['cash'] -= (cost + fill.commission)
         self.current_holdings['total'] -= (cost + fill.commission)
@@ -112,6 +123,7 @@ class Portfolio:
         symbol = signal.symbol
         sig = signal.signal_type
         strength = signal.strength
+        tuple = signal.tuple
 
         mkt_quantity = 100
         cur_quantity = self.current_positions[symbol]
@@ -121,25 +133,25 @@ class Portfolio:
         
         if cur_quantity == 0:
             if sig == 'LONG':
-                order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
+                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
             elif sig == 'SHORT':
-                order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
+                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'SELL')
 
         elif cur_quantity < 0:
             if sig == 'LONG':
-                order = OrderEvent(symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'BUY')
+                order = OrderEvent(tuple, symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'BUY')
             elif sig == 'SHORT':
-                order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
+                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'SELL')
             elif sig == 'EXIT':
-                order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
+                order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'BUY')
         
         else:
             if sig == 'LONG':
-                order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
+                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'BUY')
             elif sig == 'SHORT':
-                order = OrderEvent(symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'SELL')
+                order = OrderEvent(tuple, symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'SELL')
             elif sig == 'EXIT':
-                order = OrderEvent(symbol, order_type, abs(cur_quantity), 'SHORT')
+                order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'SHORT')
         
         
         ''' was in place of the above
