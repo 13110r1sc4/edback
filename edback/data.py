@@ -27,6 +27,7 @@ class HistoricCSVDataHandler(DataHandler):
         self.latest_symbol_data = {}
         self.continue_backtest = True
         self.multiasset = isinstance(self.symbol_tuple[0], tuple)
+        print(f'Multiasset: {self.multiasset}')
         
         # self._open_convert_csv_files()
 
@@ -41,12 +42,12 @@ class HistoricCSVDataHandler(DataHandler):
                 raise TypeError("All elements in the tuple (and nested tuples) must be strings")
 
     def YFdownload2csv(self, start_date, end_date, interval):
-        assert isinstance(interval, list) and isinstance(interval[0], str) and len(interval)==1, "Interval must be a list of 1 str"
+        assert isinstance(interval, str), "Interval must be a str"
         self.interval = interval
         if self.multiasset:
             symbols = []
-            for sublist in self.symbol_tuple:
-                for symbol in sublist:
+            for subtuple in self.symbol_tuple:
+                for symbol in subtuple:
                     symbols.append(symbol)
         else:
             symbols = self.symbol_tuple

@@ -50,9 +50,11 @@ class Portfolio:
         latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0]
 
         if self.multiasset:
-            dp, dh = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
+            dp = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
+            dh = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
         else:
-            dp, dh = {s: 0.0 for s in self.symbol_tuple}
+            dp = {s: 0.0 for s in self.symbol_tuple}
+            dh = {s: 0.0 for s in self.symbol_tuple}
 
         dp['datetime'] = latest_datetime
         dh['datetime'] = latest_datetime

@@ -9,11 +9,11 @@ def main():
 
     ########### GENERAL ###########
     events       = queue.Queue()
-    symbol_tuple = (("BTC", "ETH")) # HAS TO BE TUPLE FOR DATA HANDLING
-    csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/90m"
+    symbol_tuple = (("BTC-USD", "ETH-USD"),) # HAS TO BE TUPLE FOR DATA HANDLING
+    csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/"
 
     ############# YF ##############
-    intervals   = [["90m"]]
+    intervals   = ["90m"]
     end_date    = datetime.datetime.now()
     start_date  = end_date - datetime.timedelta(days=10)
 

@@ -50,9 +50,9 @@ class NotAPairTrade(Strategy):
     #### DEF: 
     #### Use specifics only from ccss and only do what they say
     def __init__(self, bars, events, model_window):
-        external_path = os.path.abspath('/Users/CCSS')
+        external_path = os.path.abspath('/Users/leonardorisca/Desktop/AT/strats/CCSS')
         sys.path.append(external_path)
-        from model import CCSS
+        from CCSS_fun import CCSS
         self.bars = bars
         self.symbol_tuple = self.bars.symbol_tuple
         self.events = events
