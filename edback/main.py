@@ -1,6 +1,6 @@
 import queue
 from data import HistoricCSVDataHandler
-from strategy import AdjPairTrade
+from strategy import NotAPairTrade
 from portfolio import Portfolio
 from execution import SimulatedExecutionHandler
 import datetime
@@ -9,13 +9,13 @@ def main():
 
     ########### GENERAL ###########
     events       = queue.Queue()
-    symbol_tuple = ("AAPL", "MSFT", "GOOGL") # HAS TO BE TUPLE FOR DATA HANDLING
-    csv_dir      = "/Users/"
+    symbol_tuple = (("BTC", "ETH")) # HAS TO BE TUPLE FOR DATA HANDLING
+    csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/90m"
 
     ############# YF ##############
-    intervals   = ["90m"]
+    intervals   = [["90m"]]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=2)
+    start_date  = end_date - datetime.timedelta(days=10)
 
     ######### STRATEGY ############
     model_window = ["60"]
@@ -26,7 +26,7 @@ def main():
         bars.YFdownload2csv(start_date, end_date, interval)
 
     bars._open_convert_csv_files()
-    strategy = AdjPairTrade(bars, events, model_window)
+    strategy = NotAPairTrade(bars, events, model_window)
     port = Portfolio(bars, events, start_date, initial_capital=100000.0)
     broker = SimulatedExecutionHandler(events)
 

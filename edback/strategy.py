@@ -102,7 +102,7 @@ class NotAPairTrade(Strategy):
 
                     sig_dir = []
                     b = []
-                    for i, spec in enumerate(specific):
+                    for spec in specific:
                         if spec > 0:
                             sig_dir.append('LONG')
                             b.append('LONG')
@@ -113,7 +113,10 @@ class NotAPairTrade(Strategy):
                             sig_dir.append('OUT')
                             b.append('OUT')
 
-                    signal = SignalEvent(symbol, dt, sig_dir)
+                    # MODIFY ORDER QUANTITY BASED ON COINTEGRATION COEFFICIENT
+                    order_quantity = 1
+
+                    signal = SignalEvent(symbol, dt, sig_dir, order_quantity, tuple=self.symbol_tuple)
                     self.events.put(signal)
                     self.bought[symbol] = b
 

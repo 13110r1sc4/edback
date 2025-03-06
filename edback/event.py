@@ -8,12 +8,13 @@ class MarketEvent(Event):
         self.type = 'MARKET'
 
 class SignalEvent(Event):
-    def __init__(self, symbol, datetime, signal_type, tuple=None):
+    def __init__(self, symbol, datetime, signal_type, order_quantity, tuple=None):
         self.type = 'SIGNAL'
-        self.tuple = tuple
         self.symbol = symbol
         self.datetime = datetime
         self.signal_type = signal_type
+        self.order_quantity = order_quantity
+        self.tuple = tuple
 
 class OrderEvent(Event):
     def __init__(self, symbol, order_type, quantity, direction, tuple=None):

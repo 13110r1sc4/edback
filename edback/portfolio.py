@@ -124,34 +124,36 @@ class Portfolio:
         sig = signal.signal_type
         strength = signal.strength
         tuple = signal.tuple
+        order_quantity = self.order_quantity
 
-        mkt_quantity = 100
+        # mkt_quantity = 100
         cur_quantity = self.current_positions[symbol]
         order_type = 'MKT'
 
         # modify this to handle multiasset -> loop through sig and do orders for each of the single asset
         
-        if cur_quantity == 0:
-            if sig == 'LONG':
-                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
-            elif sig == 'SHORT':
-                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'SELL')
+        for s in sig:
+            if cur_quantity == 0:
+                if s == 'LONG':
+                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
+                elif s == 'SHORT':
+                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'SELL')
 
-        elif cur_quantity < 0:
-            if sig == 'LONG':
-                order = OrderEvent(tuple, symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'BUY')
-            elif sig == 'SHORT':
-                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'SELL')
-            elif sig == 'EXIT':
-                order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'BUY')
-        
-        else:
-            if sig == 'LONG':
-                order = OrderEvent(tuple, symbol, order_type, mkt_quantity, 'BUY')
-            elif sig == 'SHORT':
-                order = OrderEvent(tuple, symbol, order_type, (mkt_quantity + abs(cur_quantity)), 'SELL')
-            elif sig == 'EXIT':
-                order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'SHORT')
+            elif cur_quantity < 0:
+                if s == 'LONG':
+                    order = OrderEvent(tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), 'BUY')
+                elif s == 'SHORT':
+                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'SELL')
+                elif s == 'EXIT':
+                    order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'BUY')
+            
+            else:
+                if s == 'LONG':
+                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'BUY')
+                elif s == 'SHORT':
+                    order = OrderEvent(tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), 'SELL')
+                elif s == 'EXIT':
+                    order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'SHORT')
         
         
         ''' was in place of the above
