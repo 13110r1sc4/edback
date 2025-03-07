@@ -67,7 +67,7 @@ class HistoricCSVDataHandler(DataHandler):
 
             if self.multiasset:
                 self.symbol_data[s] = pd.DataFrame()
-                for i,a in enumerate(self.symbol_tuple[s]):
+                for i,a in enumerate(s):
                     try:
                         new_data = pd.read_csv(os.path.join(self.csv_dir, f'{self.interval}/{a}.csv'),
                                                             header=0, index_col=0, parse_dates=True, names=['datetime', f'{a}_close']
@@ -75,19 +75,27 @@ class HistoricCSVDataHandler(DataHandler):
                         new_data.sort_index(inplace=True)
                         if comb_index is None:
                             comb_index = new_data.index
+                            
                         else:
                             comb_index = comb_index.union(new_data.index)
                         self.latest_symbol_data[s] = []
 
                         if i != 0:
-                            self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
+
+                            # Inside your code, before the reindex operation:
+                            print(f"Type of comb_index: {type(comb_index)}, dtype: {comb_index.dtype}")
+                            print(f"Type of self.symbol_data[s].index: {type(self.symbol_data[s].index)}, dtype: {self.symbol_data[s].index.dtype}")
+                            
+                           
                             self.symbol_data[s] = pd.concat([self.symbol_data[s], new_data])
+                            self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
+                            # ------------------------------
                             self.symbol_data[s][f"{a}_returns"] = self.symbol_data[s][f"{a}_close"].pct_change().dropna()
                     
                     except FileNotFoundError:
                         print(f"File {a}.csv not found.")
 
-                    self.symbol_data[s] = self.symbol_data[s].iterrows()
+                    # self.symbol_data[s] = self.symbol_data[s].iterrows()
                         
             else:
                 self.symbol_data[s] = pd.read_csv(
@@ -106,9 +114,12 @@ class HistoricCSVDataHandler(DataHandler):
 
         for s in self.symbol_tuple:
                 # use combindex to adjust dates and forward-fill missing data
-                self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
+            self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
+
+            if not self.multiasset:
                 self.symbol_data[s]["returns"] = self.symbol_data[s]["close"].pct_change().dropna()
-                self.symbol_data[s] = self.symbol_data[s].iterrows()
+            
+            self.symbol_data[s] = self.symbol_data[s].iterrows()
     
 
     def _get_new_bar(self, symbol):
@@ -123,7 +134,7 @@ class HistoricCSVDataHandler(DataHandler):
                 if not isinstance(symbol, tuple):
                     print("Method argument 'symbol' has to be a tuple when there are multiple assets")
                 else:
-                    yield tuple([b[0]]+ [symbol[sym] for sym in symbol] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
+                    yield tuple([b[0]]+ [symbol[_] for _ in range(len(symbol))] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
 
             else:
                 if not isinstance(symbol, str):
