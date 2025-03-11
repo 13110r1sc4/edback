@@ -80,7 +80,11 @@ class HistoricCSVDataHandler(DataHandler):
                             comb_index = comb_index.union(new_data.index)
                         self.latest_symbol_data[s] = []
 
-                        if i != 0:
+                        if i == 0:
+                            self.symbol_data[s] = new_data
+                            # Add the returns column for the first asset
+                            self.symbol_data[s][f"{a}_returns"] = self.symbol_data[s][f"{a}_close"].pct_change().dropna()
+                        else:
 
                             # Inside your code, before the reindex operation:
                             print(f"Type of comb_index: {type(comb_index)}, dtype: {comb_index.dtype}")
@@ -134,6 +138,8 @@ class HistoricCSVDataHandler(DataHandler):
                 if not isinstance(symbol, tuple):
                     print("Method argument 'symbol' has to be a tuple when there are multiple assets")
                 else:
+                    print(b[1].index)  # If 'b[1]' is a Series
+
                     yield tuple([b[0]]+ [symbol[_] for _ in range(len(symbol))] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
 
             else:
