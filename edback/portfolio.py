@@ -101,13 +101,15 @@ class Portfolio:
         if fill.direction == 'SELL':
             fill_dir = -1
         
-        if self.multiasset:
-            for i, tckr in enumerate(fill.tuple):
-                if fill.symbol == tckr:
-                    index = i + 1
-            fill_cost = self.bars.get_latest_bars(fill.symbol)[0][len(fill.tuple) + index]
-        else:
-            fill_cost = self.bars.get_latest_bars(fill.symbol)[0][2]
+        # if self.multiasset:
+        #     for i, tckr in enumerate(fill.tuple):
+        #         if fill.symbol == tckr:
+        #             index = i + 1
+        #     fill_cost = self.bars.get_latest_bars(fill.symbol)[0][len(fill.tuple) + index]
+        # else:
+        #     fill_cost = self.bars.get_latest_bars(fill.symbol)[0][2]
+
+        fill_cost = fill.fill_price
 
         cost = fill_dir * fill_cost * fill.quantity # fill_cost is close
         self.current_holdings[fill.tuple][fill.symbol] += cost
@@ -122,41 +124,42 @@ class Portfolio:
 
     def generate_naive_order(self, signal):
         order = None
-
-        symbol = signal.symbol
+        datetime = signal.datetime
         sig = signal.signal_type
-        strength = signal.strength
         tuple = signal.tuple
-        order_quantity = self.order_quantity
+        order_quantity = signal.order_quantity
+        latestPricesForFill = signal.latestPricesForFill 
 
         # mkt_quantity = 100
-        cur_quantity = self.current_positions[symbol]
         order_type = 'MKT'
 
         # modify this to handle multiasset -> loop through sig and do orders for each of the single asset
         
-        for s in sig:
+        for i, s in enumerate(sig):
+            symbol = tuple[i]
+            cur_quantity = self.current_positions[tuple][symbol]
+            latestPrice = latestPricesForFill[i]
             if cur_quantity == 0:
                 if s == 'LONG':
-                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
                 elif s == 'SHORT':
-                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'SELL')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='SELL')
 
             elif cur_quantity < 0:
                 if s == 'LONG':
-                    order = OrderEvent(tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), 'BUY')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), latestPrice, direction='BUY')
                 elif s == 'SHORT':
-                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'SELL')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='SELL')
                 elif s == 'EXIT':
-                    order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'BUY')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, abs(cur_quantity), latestPrice, direction='BUY')
             
             else:
                 if s == 'LONG':
-                    order = OrderEvent(tuple, symbol, order_type, order_quantity, 'BUY')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='BUY')
                 elif s == 'SHORT':
-                    order = OrderEvent(tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), 'SELL')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), latestPrice, direction='SELL')
                 elif s == 'EXIT':
-                    order = OrderEvent(tuple, symbol, order_type, abs(cur_quantity), 'SHORT')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, abs(cur_quantity), latestPrice, direction='SHORT')
         
         
         ''' was in place of the above

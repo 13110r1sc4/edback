@@ -2,6 +2,11 @@ from abc import ABCMeta, abstractmethod
 from event import SignalEvent
 import sys
 import os
+import numpy as np
+external_path = os.path.abspath('/Users/leonardorisca/Desktop/AT/strats/CCSS')
+sys.path.append(external_path)
+from CCSS_fun import CCSS
+
 
 class Strategy(object):
     __metaclass__ = ABCMeta
@@ -50,9 +55,7 @@ class NotAPairTrade(Strategy):
     #### DEF: 
     #### Use specifics only from ccss and only do what they say
     def __init__(self, bars, events, model_window):
-        external_path = os.path.abspath('/Users/leonardorisca/Desktop/AT/strats/CCSS')
-        sys.path.append(external_path)
-        from CCSS_fun import CCSS
+        
         self.bars = bars
         self.symbol_tuple = self.bars.symbol_tuple
         self.events = events
@@ -70,36 +73,18 @@ class NotAPairTrade(Strategy):
 
     def calculate_signals(self, event):
         if event.type == 'MARKET':
-            for symbol in self.symbol_tuple:
-                bars = self.bars.get_latest_bars(symbol, N=self.model_window)
+            for tuple in self.symbol_tuple:
+                bars = self.bars.get_latest_bars(tuple, N=self.model_window)
+                
                 if bars is not None and len(bars) == self.model_window:
-                    ccss = CCSS(bars)
+                    bars_array = np.array([(t[3], t[4]) for t in bars]).T
+                    latestPriceForFill = bars_array[:,-1].T
+
+                    ccss = CCSS(bars_array)
                     ccss.fit()
                     specific = ccss.predict().specific()
 
-                    dt = bars[-1][1]
-
-                    #---------------------------------------
-                    # if spread_pred > spread_actual and self.bought[symbol] == ["OUT", "OUT"]:
-                    #     sig_dir = 'LONG'
-                    #     signal = SignalEvent(symbol, dt, sig_dir)
-                    #     self.events.put(signal)
-                    #     self.bought[symbol] = 'LONG'
-                    # elif short_sma < long_sma and self.bought[symbol] == "LONG":
-                    #     sig_dir = 'EXIT'
-                    #     signal = SignalEvent(symbol, dt, sig_dir)
-                    #     self.events.put(signal)
-                    #     self.bought[symbol] = 'OUT'
-
-                    # ADD LOGIC TO SEE IF SPEC IS SIGNIFICANT + USE EXIT
-                    #---------------------------------------
-
-                    # signal = SignalEvent(symbol, dt, sig_dir) ???
-                    # for asset in symbol:
-
-                    #     if self.bought[symbol][asset] == # signal
-
-
+                    dt = bars[-1][0]
                     sig_dir = []
                     b = []
                     for spec in specific:
@@ -116,61 +101,6 @@ class NotAPairTrade(Strategy):
                     # MODIFY ORDER QUANTITY BASED ON COINTEGRATION COEFFICIENT
                     order_quantity = 1
 
-                    signal = SignalEvent(symbol, dt, sig_dir, order_quantity, tuple=self.symbol_tuple)
+                    signal = SignalEvent(tuple, dt, sig_dir, order_quantity, latestPriceForFill)
                     self.events.put(signal)
-                    self.bought[symbol] = b
-
-                    #-------------------------------
-                    '''
-                    if specific[0] > 0 and specific[1] > 0:
-                        if self.bought[symbol] == ["OUT", "OUT"]:
-                            sig_dir = ['LONG', 'LONG']
-                            signal = SignalEvent(symbol, dt, sig_dir)
-                            self.events.put(signal)
-                            self.bought[symbol] = ['LONG', 'LONG']
-                        else:
-                            if "SHORT" in self.bought[symbol]:
-                                for _ in range(2):
-                                    if self.bought[symbol] == 'SHORT':
-                                        self.bought[symbol][_] = 'LONG'
-                                
-
-                    elif specific[0] < 0 and specific[1] < 0:
-                        if self.bought[symbol] == ["OUT", "OUT"]:
-                            sig_dir = ['SHORT', 'SHORT']
-                            signal = SignalEvent(symbol, dt, sig_dir)
-                            self.events.put(signal)
-                            self.bought[symbol] = ['SHORT', 'SHORT']
-                        else:
-                            if "LONG" in self.bought[symbol]:
-                                for _ in range(2):
-                                    if self.bought[symbol] == 'LONG':
-                                        self.bought[symbol][_] = 'SHORT'
-                               
-
-                    elif specific[0] > 0 and specific[1] < 0:
-                            
-                            if self.bought[symbol] == ["OUT", "OUT"]:
-                                sig_dir = ['LONG', 'SHORT']
-                                signal = SignalEvent(symbol, dt, sig_dir)
-                                self.events.put(signal)
-                                self.bought[symbol] = ['LONG', 'SHORT']
-                            elif self.bought[symbol] == ['LONG', 'SHORT']:
-                                pass
-                            else:
-                                for ind,p in enumerate(['LONG', 'SHORT']):
-                                    self.bought[symbol][ind] = p
-
-                    elif specific[0] < 0 and specific[1] > 0:
-                        if self.bought[symbol] == ["OUT", "OUT"]:
-                            sig_dir = ['SHORT', 'LONG']
-                            signal = SignalEvent(symbol, dt, sig_dir)
-                            self.events.put(signal)
-                            self.bought[symbol] = ['SHORT', 'LONG']
-                        elif self.bought[symbol] == ['SHORT', 'LONG']:
-                            pass
-                        else:
-                            for ind,p in enumerate(['SHORT', 'LONG']):
-                                    self.bought[symbol][ind] = p
-                    
-                    '''
+                    self.bought[tuple] = b

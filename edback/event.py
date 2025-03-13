@@ -8,25 +8,28 @@ class MarketEvent(Event):
         self.type = 'MARKET'
 
 class SignalEvent(Event):
-    def __init__(self, symbol, datetime, signal_type, order_quantity, tuple=None):
+    def __init__(self, tuple, datetime, signal_type, order_quantity, latestPricesForFill):
         self.type = 'SIGNAL'
-        self.symbol = symbol
+        # self.symbol = symbol
         self.datetime = datetime
         self.signal_type = signal_type
         self.order_quantity = order_quantity
         self.tuple = tuple
+        self.latestPricesForFill = latestPricesForFill
 
 class OrderEvent(Event):
-    def __init__(self, symbol, order_type, quantity, direction, tuple=None):
+    def __init__(self, datetime, tuple, symbol, order_type, quantity, latestPrice, direction):
         self.type = 'ORDER'
+        self.datetime = datetime
         self.tuple = tuple
         self.symbol = symbol
         self.order_type = order_type
         self.quantity = quantity
         self.direction = direction
+        self.latestPrice = latestPrice
 
 class FillEvent(Event):
-    def __init__(self, timeindex, symbol, exchange, quantity, direction, fill_cost, tuple=None, commission=None):
+    def __init__(self, timeindex, tuple, symbol, exchange, quantity, direction, fill_price, commission=None):
         self.type = 'FILL'
         self.timeindex = timeindex
         self.tuple = tuple
@@ -34,7 +37,7 @@ class FillEvent(Event):
         self.exchange = exchange
         self.quantity = quantity
         self.direction = direction
-        self.fill_cost = fill_cost
+        self.fill_price = fill_price
         
         if commission is None:
             self.commission = self.calculate_ib_commission()

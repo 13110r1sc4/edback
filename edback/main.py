@@ -14,12 +14,12 @@ def main():
 
     ############# YF ##############
     useYf = True
-    intervals   = ["90m"]
+    intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=10)
+    start_date  = end_date - datetime.timedelta(days=100)
 
     ######### STRATEGY ############
-    model_window = 40
+    model_window = 20
     ###############################
     
     bars = HistoricCSVDataHandler(events, csv_dir, symbol_tuple)
@@ -47,11 +47,11 @@ def main():
             else:
                 if event is not None:
                     if event.type == 'MARKET':
-                        print('MARKET')
+                        # print('MARKET')
                         strategy.calculate_signals(event)
                         port.update_timeindex(event)
                     elif event.type == 'SIGNAL':
-                        print('SIGNAL')
+                        # print('SIGNAL')
                         port.update_signal(event)
                     elif event.type == 'ORDER':
                         broker.execute_order(event)

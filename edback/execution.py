@@ -15,15 +15,18 @@ class SimulatedExecutionHandler(ExecutionHandler):
     def execute_order(self, event):
         if event.type == 'ORDER': 
 
-            fill_price = event.price
+            fill_price = event.latestPrice
             quantity = event.quantity
+            direction = event.direction
 
             # Create a FillEvent to signal that an order has been filled
             fill_event = FillEvent(
-                timeindex=event.timeindex,
+                timeindex=event.datetime,
                 tuple=event.tuple,
                 symbol=event.symbol,
+                exchange = None,
                 quantity=quantity,
+                direction=direction,
                 fill_price=fill_price,
                 commission=self.calculate_commission(quantity, fill_price)
             )

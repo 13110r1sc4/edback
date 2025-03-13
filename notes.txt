@@ -1,10 +1,3 @@
 - define commission in execution
 
-
-
-
-- modify excetion to define direction (and other parameters)?
-
-- mkt_quantity in portfolio generate naive_order to be taken from signal (strategy) as input for the gno function
-
-- change the check to set multiasset to T/F to be able to do the check for each of the tuples in tuple
+- fill event is fileld with latest prices, taken from strategy and inserted into signal
