@@ -13,17 +13,19 @@ def main():
     csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/"
 
     ############# YF ##############
+    useYf = True
     intervals   = ["90m"]
     end_date    = datetime.datetime.now()
     start_date  = end_date - datetime.timedelta(days=10)
 
     ######### STRATEGY ############
-    model_window = ["60"]
+    model_window = 40
     ###############################
     
     bars = HistoricCSVDataHandler(events, csv_dir, symbol_tuple)
-    for interval in intervals:
-        bars.YFdownload2csv(start_date, end_date, interval)
+    if useYf == True:
+        for interval in intervals:
+            bars.YFdownload2csv(start_date, end_date, interval)
 
     bars._open_convert_csv_files()
     strategy = NotAPairTrade(bars, events, model_window)
@@ -45,9 +47,11 @@ def main():
             else:
                 if event is not None:
                     if event.type == 'MARKET':
+                        print('MARKET')
                         strategy.calculate_signals(event)
                         port.update_timeindex(event)
                     elif event.type == 'SIGNAL':
+                        print('SIGNAL')
                         port.update_signal(event)
                     elif event.type == 'ORDER':
                         broker.execute_order(event)

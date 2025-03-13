@@ -61,69 +61,39 @@ class HistoricCSVDataHandler(DataHandler):
                     print(f"Error downloading {symbol}: {str(e)}")
 
     def _open_convert_csv_files(self):
-        comb_index = None
+        '''
+        Each csv file must have two columns:
+         1. Datetime
+         2. Price
+        '''
 
         for s in self.symbol_tuple:
-
-            if self.multiasset:
-                self.symbol_data[s] = pd.DataFrame()
-                for i,a in enumerate(s):
-                    try:
-                        new_data = pd.read_csv(os.path.join(self.csv_dir, f'{self.interval}/{a}.csv'),
-                                                            header=0, index_col=0, parse_dates=True, names=['datetime', f'{a}_close']
-                        )
-                        new_data.sort_index(inplace=True)
-                        if comb_index is None:
-                            comb_index = new_data.index
-                            
-                        else:
-                            comb_index = comb_index.union(new_data.index)
-                        self.latest_symbol_data[s] = []
-
-                        if i == 0:
-                            self.symbol_data[s] = new_data
-                            # Add the returns column for the first asset
-                            self.symbol_data[s][f"{a}_returns"] = self.symbol_data[s][f"{a}_close"].pct_change().dropna()
-                        else:
-
-                            # Inside your code, before the reindex operation:
-                            print(f"Type of comb_index: {type(comb_index)}, dtype: {comb_index.dtype}")
-                            print(f"Type of self.symbol_data[s].index: {type(self.symbol_data[s].index)}, dtype: {self.symbol_data[s].index.dtype}")
-                            
-                           
-                            self.symbol_data[s] = pd.concat([self.symbol_data[s], new_data])
-                            self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
-                            # ------------------------------
-                            self.symbol_data[s][f"{a}_returns"] = self.symbol_data[s][f"{a}_close"].pct_change().dropna()
+                
+            dfs = []
+            for tkr in s:
+                try:
+                    new_data = pd.read_csv(os.path.join(self.csv_dir, f'{self.interval}/{tkr}.csv'),
+                                                            header=0, index_col=0, parse_dates=['datetime'], names=['datetime', f'{tkr}_close'])
+                    new_data.sort_index(inplace=True)
                     
-                    except FileNotFoundError:
-                        print(f"File {a}.csv not found.")
+                    if not pd.api.types.is_numeric_dtype(new_data[f'{tkr}_close']):
+                        new_data[f'{tkr}_close'] = pd.to_numeric(new_data[f'{tkr}_close'], errors='coerce')
 
-                    # self.symbol_data[s] = self.symbol_data[s].iterrows()
-                        
-            else:
-                self.symbol_data[s] = pd.read_csv(
-                    os.path.join(self.csv_dir, f'{self.interval}/{s}.csv'),
-                    header=0, index_col=0, parse_dates=True,
-                    names=['datetime', 'close']
-                )
-            
-                self.symbol_data[s].sort_index(inplace=True)
-                # create combindex for dates that has all available dates in it
-                if comb_index is None:
-                    comb_index = self.symbol_data[s].index
-                else:
-                    comb_index = comb_index.union(self.symbol_data[s].index)
+                    new_data.interpolate(method="linear", inplace=True)
+
+                    new_data[f"{tkr}_returns"] = new_data[f"{tkr}_close"].pct_change().fillna(0)
+                    dfs.append(new_data)
+
+                except FileNotFoundError:
+                    print(f"File {tkr}.csv not found.")
+
                 self.latest_symbol_data[s] = []
+                self.symbol_data[s] = pd.concat(dfs, axis=1, join="outer")
 
-        for s in self.symbol_tuple:
-                # use combindex to adjust dates and forward-fill missing data
-            self.symbol_data[s] = self.symbol_data[s].reindex(index=comb_index, method='pad')
-
-            if not self.multiasset:
-                self.symbol_data[s]["returns"] = self.symbol_data[s]["close"].pct_change().dropna()
-            
-            self.symbol_data[s] = self.symbol_data[s].iterrows()
+                if self.symbol_data[s].iloc[0].isna().any():
+                    self.symbol_data[s].iloc[0] = self.symbol_data[s].iloc[0].ffill()
+                self.symbol_data[s].interpolate(method="linear", inplace=True)
+                self.symbol_data[s] = self.symbol_data[s].iterrows()
     
 
     def _get_new_bar(self, symbol):
@@ -138,8 +108,6 @@ class HistoricCSVDataHandler(DataHandler):
                 if not isinstance(symbol, tuple):
                     print("Method argument 'symbol' has to be a tuple when there are multiple assets")
                 else:
-                    print(b[1].index)  # If 'b[1]' is a Series
-
                     yield tuple([b[0]]+ [symbol[_] for _ in range(len(symbol))] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
 
             else:
@@ -155,7 +123,7 @@ class HistoricCSVDataHandler(DataHandler):
             print(f"That symbol {symbol} is not available in the historical data set.")
             return None
         else:
-            if len(bars_list) == N:
+            if len(bars_list) >= N: # should be changed, this is temp 
                 return bars_list[-N:]
 
     def update_bars(self):
@@ -168,4 +136,5 @@ class HistoricCSVDataHandler(DataHandler):
             else:
                 if bar is not None:
                     self.latest_symbol_data[s].append(bar)
+
         self.events.put(MarketEvent())

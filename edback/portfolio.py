@@ -47,7 +47,8 @@ class Portfolio:
         return d
 
     def update_timeindex(self, event):
-        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0]
+
+        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0] # modify to be dynamic
 
         if self.multiasset:
             dp = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
@@ -66,12 +67,12 @@ class Portfolio:
             if self.multiasset:
                 for i,t  in enumerate(s):
                     dp[s][t] = self.current_positions[s][t]
-                    market_value = self.current_positions[s][t] * self.bars.get_latest_bars(s)[3+i] # date, tckr1, tckr2,
+                    market_value = self.current_positions[s][t] * self.bars.get_latest_bars(s)[0][3+i] # date, tckr1, tckr2,
                     dh[s][t] = market_value
                     dh['total'] += market_value
             else:
                 dp[s] = self.current_positions[s]
-                market_value = self.current_positions[s] * self.bars.get_latest_bars(s)[2]
+                market_value = self.current_positions[s] * self.bars.get_latest_bars(s)[0][2]
                 dh[s] = market_value
                 dh['total'] += market_value
 
