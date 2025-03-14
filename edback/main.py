@@ -16,10 +16,10 @@ def main():
     useYf = True
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=100)
+    start_date  = end_date - datetime.timedelta(days=365)
 
     ######### STRATEGY ############
-    model_window = 20
+    model_window = 30
     ###############################
     
     bars = HistoricCSVDataHandler(events, csv_dir, symbol_tuple)
