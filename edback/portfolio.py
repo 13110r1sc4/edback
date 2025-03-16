@@ -45,6 +45,9 @@ class Portfolio:
         d['commission'] = 0.0
         d['total'] = self.initial_capital
         return d
+    
+    def get_portfolio_value_history(self):
+        return pd.DataFrame(self.all_holdings)[['datetime', 'total']]
 
     def update_timeindex(self, event):
 

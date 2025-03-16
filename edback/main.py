@@ -4,6 +4,8 @@ from strategy import NotAPairTrade
 from portfolio import Portfolio
 from execution import SimulatedExecutionHandler
 import datetime
+import matplotlib.pyplot as plt
+import pandas as pd
 
 def main():
 
@@ -16,7 +18,7 @@ def main():
     useYf = True
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=365)
+    start_date  = end_date - datetime.timedelta(days=50)
 
     ######### STRATEGY ############
     model_window = 30
@@ -60,6 +62,21 @@ def main():
 
     print(f"Final Portfolio Value: ${port.current_holdings['cash']:.2f}")
     print(f"Total Return: {(port.current_holdings['cash'] / port.initial_capital - 1) * 100:.2f}%")
+
+    df = port.get_portfolio_value_history()
+    df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+
+    print(df.tail())
+
+    # plt.figure(figsize=(10, 5))
+    # plt.plot(df['datetime'], df['total'], label="Portfolio Value", color='blue')
+    # plt.xlabel("Time")
+    # plt.ylabel("Portfolio Value ($)")
+    # plt.title("Portfolio Value Over Time")
+    # plt.legend()
+    # plt.grid()
+    # plt.xticks(rotation=45)
+    # plt.show()
 
 if __name__ == "__main__":
     main()
