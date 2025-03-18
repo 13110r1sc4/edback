@@ -163,20 +163,6 @@ class Portfolio:
                     order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), latestPrice, direction='SELL')
                 elif s == 'EXIT':
                     order = OrderEvent(datetime, tuple, symbol, order_type, abs(cur_quantity), latestPrice, direction='SHORT')
-        
-        
-        ''' was in place of the above
-
-        if sig == 'LONG' and cur_quantity == 0:
-            order = OrderEvent(symbol, order_type, mkt_quantity, 'BUY')
-        if sig == 'SHORT' and cur_quantity == 0:
-            order = OrderEvent(symbol, order_type, mkt_quantity, 'SELL')
-
-        if sig == 'EXIT' and cur_quantity > 0:
-            order = OrderEvent(symbol, order_type, abs(cur_quantity), 'SELL')
-        if sig == 'EXIT' and cur_quantity < 0:
-            order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
-        '''
 
         return order
 
@@ -185,4 +171,38 @@ class Portfolio:
             order_event = self.generate_naive_order(event)
             self.events.put(order_event)
 
-            
+    def cleanUpPositions(self, ):
+        '''check current pos -> close them with new order (if needed) -> fill order and update positions '''
+
+        datetime = 'CLEANUP'
+        order_type = 'MKT'
+        
+        latestPrice = 
+        # cp = self.current_positions
+
+        if self.multiasset:
+            for t in self.symbol_tuple:
+                for s in t:
+                    cp = self.current_positions[t][s]
+                    if cp < 0:
+                        direction = 'BUY'
+                    elif cp > 0:
+                        direction = 'SELL'
+                    else:
+                        return
+                    order_quantity = abs(cp)
+                    order = OrderEvent(datetime, t, s, order_type, order_quantity, latestPrice, direction)
+
+        else:
+            for s in self.symbol_tuple:
+                cp = self.current_positions[s][s]
+                if cp < 0:
+                    direction = 'BUY'
+                elif cp > 0:
+                    direction = 'SELL'
+                else:
+                    return
+                order_quantity = abs(cp)
+                order = OrderEvent(datetime, s, s, order_type, order_quantity, latestPrice, direction)
+
+        # send order and ...

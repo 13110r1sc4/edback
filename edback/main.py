@@ -39,6 +39,8 @@ def main():
         if bars.continue_backtest:
             bars.update_bars()
         else:
+            # CLEAN UP POSITIONS
+            port.cleanUpPositions()
             break
 
         while True:

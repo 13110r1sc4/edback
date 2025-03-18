@@ -1,3 +1,5 @@
 - define commission in execution
 
-- fill event is fileld with latest prices, taken from strategy and inserted into signal
+- strategy should handle new positions based on last positions and also handle closing positions with exit.
+- generate naive order to handle 'OUT' direction
+- add a clean up to close last-day positions
