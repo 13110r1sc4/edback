@@ -40,7 +40,7 @@ def main():
             bars.update_bars()
         else:
             # CLEAN UP POSITIONS
-            port.cleanUpPositions()
+            port.cleanUpPositions(bars)
             break
 
         while True:

@@ -171,12 +171,13 @@ class Portfolio:
             order_event = self.generate_naive_order(event)
             self.events.put(order_event)
 
-    def cleanUpPositions(self, ):
+    def cleanUpPositions(self, bars):
         '''check current pos -> close them with new order (if needed) -> fill order and update positions '''
 
         datetime = 'CLEANUP'
         order_type = 'MKT'
-        
+        latestBar = bars.get_latest_bars()
+
         latestPrice = 
         # cp = self.current_positions
 
