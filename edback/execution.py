@@ -30,7 +30,7 @@ class SimulatedExecutionHandler(ExecutionHandler):
                 fill_price=fill_price,
                 commission=self.calculate_commission(quantity, fill_price)
             )
-
+            
             # Put the fill event in the events queue for further processing
             self.events.put(fill_event)
 

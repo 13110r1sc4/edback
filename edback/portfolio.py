@@ -47,7 +47,7 @@ class Portfolio:
         return d
     
     def get_portfolio_value_history(self):
-        return pd.DataFrame(self.all_holdings)[['datetime', 'total']]
+        return pd.DataFrame(self.all_holdings)
 
     def update_timeindex(self, event):
 
@@ -170,40 +170,3 @@ class Portfolio:
         if event.type == 'SIGNAL':
             order_event = self.generate_naive_order(event)
             self.events.put(order_event)
-
-    def cleanUpPositions(self, bars):
-        '''check current pos -> close them with new order (if needed) -> fill order and update positions '''
-
-        datetime = 'CLEANUP'
-        order_type = 'MKT'
-        latestBar = bars.get_latest_bars()
-
-        latestPrice = 
-        # cp = self.current_positions
-
-        if self.multiasset:
-            for t in self.symbol_tuple:
-                for s in t:
-                    cp = self.current_positions[t][s]
-                    if cp < 0:
-                        direction = 'BUY'
-                    elif cp > 0:
-                        direction = 'SELL'
-                    else:
-                        return
-                    order_quantity = abs(cp)
-                    order = OrderEvent(datetime, t, s, order_type, order_quantity, latestPrice, direction)
-
-        else:
-            for s in self.symbol_tuple:
-                cp = self.current_positions[s][s]
-                if cp < 0:
-                    direction = 'BUY'
-                elif cp > 0:
-                    direction = 'SELL'
-                else:
-                    return
-                order_quantity = abs(cp)
-                order = OrderEvent(datetime, s, s, order_type, order_quantity, latestPrice, direction)
-
-        # send order and ...

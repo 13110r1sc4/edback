@@ -6,6 +6,58 @@ from execution import SimulatedExecutionHandler
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+from event import OrderEvent
+
+def cleanUpPositions(symbol_tuple, bars, broker, port, events):
+        '''check current pos -> close them with new order (if needed) -> fill order and update positions '''
+
+        datetime = 'CLEANUP'
+        order_type = 'MKT'
+
+        if bars.multiasset:
+            for t in symbol_tuple:
+                latestBar = bars.get_latest_bars(t)[0]
+                l = len(latestBar)
+                print(l)
+                for i, s in enumerate(t):
+                    cp = port.current_positions[t][s]
+                    latestPrice = latestBar[(l-1)//2+1+i]
+                    
+                    if cp < 0:
+                        direction = 'BUY'
+                    elif cp > 0:
+                        direction = 'SELL'
+                    else:
+                        return
+                    order_quantity = abs(cp)
+                    order = OrderEvent(datetime, t, s, order_type, order_quantity, latestPrice, direction)
+                    events.put(order)
+        else:
+            for i, s in enumerate(symbol_tuple):
+                latestBar = bars.get_latest_bars(s)[0]
+                cp = port.current_positions[s][s]
+                latestPrice = latestBar[2+i]
+                if cp < 0:
+                    direction = 'BUY'
+                elif cp > 0:
+                    direction = 'SELL'
+                else:
+                    return
+                order_quantity = abs(cp)
+                order = OrderEvent(datetime, s, s, order_type, order_quantity, latestPrice, direction)
+                events.put(order)
+
+        while True:
+            try:
+                event = events.get(False)
+            except queue.Empty:
+                break
+            else:
+                if event is not None:
+                    if event.type == 'ORDER':
+                        broker.execute_order(event)
+                    elif event.type == 'FILL':
+                        port.update_fill(event)
 
 def main():
 
@@ -18,7 +70,7 @@ def main():
     useYf = True
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=50)
+    start_date  = end_date - datetime.timedelta(days=35)
 
     ######### STRATEGY ############
     model_window = 30
@@ -40,7 +92,7 @@ def main():
             bars.update_bars()
         else:
             # CLEAN UP POSITIONS
-            port.cleanUpPositions(bars)
+            cleanUpPositions(symbol_tuple, bars, broker, port, events)
             break
 
         while True:
@@ -51,11 +103,9 @@ def main():
             else:
                 if event is not None:
                     if event.type == 'MARKET':
-                        # print('MARKET')
                         strategy.calculate_signals(event)
                         port.update_timeindex(event)
                     elif event.type == 'SIGNAL':
-                        # print('SIGNAL')
                         port.update_signal(event)
                     elif event.type == 'ORDER':
                         broker.execute_order(event)
