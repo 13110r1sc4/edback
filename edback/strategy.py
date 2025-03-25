@@ -83,7 +83,6 @@ class NotAPairTrade(Strategy):
                     ccss = CCSS(bars_array)
                     ccss.fit()
                     specific = ccss.predict().specific()
-
                     dt = bars[-1][0]
                     sig_dir = []
                     b = []

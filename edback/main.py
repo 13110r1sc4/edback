@@ -67,7 +67,7 @@ def main():
     csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/"
 
     ############# YF ##############
-    useYf = True
+    useYf = False
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
     start_date  = end_date - datetime.timedelta(days=35)
@@ -76,7 +76,7 @@ def main():
     model_window = 30
     ###############################
     
-    bars = HistoricCSVDataHandler(events, csv_dir, symbol_tuple)
+    bars = HistoricCSVDataHandler(events, csv_dir, symbol_tuple, intervals[0])
     if useYf == True:
         for interval in intervals:
             bars.YFdownload2csv(start_date, end_date, interval)
@@ -114,11 +114,12 @@ def main():
 
     print(f"Final Portfolio Value: ${port.current_holdings['cash']:.2f}")
     print(f"Total Return: {(port.current_holdings['cash'] / port.initial_capital - 1) * 100:.2f}%")
+    global df_h, df_p
+    df_h, df_p = port.get_portfolio_value_history()
+    
+    # CD = bars.checkData()
 
-    df = port.get_portfolio_value_history()
-    df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
-
-    print(df.tail())
+    # df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
 
     # plt.figure(figsize=(10, 5))
     # plt.plot(df['datetime'], df['total'], label="Portfolio Value", color='blue')

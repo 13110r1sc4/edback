@@ -47,11 +47,12 @@ class Portfolio:
         return d
     
     def get_portfolio_value_history(self):
-        return pd.DataFrame(self.all_holdings)
+        # return pd.DataFrame(self.all_holdings)
+        return self.all_holdings, self.all_positions
 
     def update_timeindex(self, event):
 
-        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0] # modify to be dynamic
+        latest_datetime = self.bars.get_latest_bars(self.symbol_tuple[0])[0][0] # modify to be dynamic
 
         if self.multiasset:
             dp = {t: {s: 0.0 for s in t} for t in self.symbol_tuple}
@@ -92,6 +93,7 @@ class Portfolio:
             fill_dir = -1
         
         if self.multiasset:
+            print(fill.tuple, fill.symbol)
             self.current_positions[fill.tuple][fill.symbol] += fill_dir * fill.quantity
         else:
             self.current_positions[fill.symbol] += fill_dir * fill.quantity
@@ -164,9 +166,9 @@ class Portfolio:
                 elif s == 'EXIT':
                     order = OrderEvent(datetime, tuple, symbol, order_type, abs(cur_quantity), latestPrice, direction='SHORT')
 
-        return order
+            self.events.put(order)
 
     def update_signal(self, event):
         if event.type == 'SIGNAL':
             order_event = self.generate_naive_order(event)
-            self.events.put(order_event)
+            # self.events.put(order_event)

@@ -17,12 +17,13 @@ class DataHandler(object):
         raise NotImplementedError("Should implement update_bars()")
 
 class HistoricCSVDataHandler(DataHandler):
-    def __init__(self, events, csv_dir, symbol_tuple):
+    def __init__(self, events, csv_dir, symbol_tuple, interval):
         self.events = events
         self.csv_dir = csv_dir
         assert isinstance(symbol_tuple, tuple), "symbol_tuple must be a tuple"
         self.check_input(symbol_tuple)
         self.symbol_tuple = symbol_tuple
+        self.interval = interval
         self.symbol_data = {}
         self.latest_symbol_data = {}
         self.continue_backtest = True
@@ -94,7 +95,9 @@ class HistoricCSVDataHandler(DataHandler):
                     self.symbol_data[s].iloc[0] = self.symbol_data[s].iloc[0].ffill()
                 self.symbol_data[s].interpolate(method="linear", inplace=True)
                 self.symbol_data[s] = self.symbol_data[s].iterrows()
-    
+
+    # def checkData(self):
+    #     return self.symbol_data
 
     def _get_new_bar(self, symbol):
         '''
@@ -108,13 +111,13 @@ class HistoricCSVDataHandler(DataHandler):
                 if not isinstance(symbol, tuple):
                     print("Method argument 'symbol' has to be a tuple when there are multiple assets")
                 else:
-                    yield tuple([b[0]]+ [symbol[_] for _ in range(len(symbol))] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
+                    yield tuple([b[0].strftime('%Y-%m-%d %H:%M:%S')]+ [symbol[_] for _ in range(len(symbol))] + [b[1][f'{tckr}_close'] for tckr in symbol]) # b 1 is all but the index
 
             else:
                 if not isinstance(symbol, str):
                     print("Method argument 'symbol' has to be a str when single asset")
                 else:
-                    yield tuple([b[0], symbol, b[1]['close']])
+                    yield tuple([b[0].strftime('%Y-%m-%d %H:%M:%S'), symbol, b[1]['close']])
 
     def get_latest_bars(self, symbol, N=1):
         try:
