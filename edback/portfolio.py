@@ -48,7 +48,7 @@ class Portfolio:
     
     def get_portfolio_value_history(self):
         # return pd.DataFrame(self.all_holdings)
-        return self.all_holdings, self.all_positions
+        return pd.DataFrame(self.all_holdings), pd.DataFrame(self.all_positions)
 
     def update_timeindex(self, event):
 
@@ -93,7 +93,6 @@ class Portfolio:
             fill_dir = -1
         
         if self.multiasset:
-            print(fill.tuple, fill.symbol)
             self.current_positions[fill.tuple][fill.symbol] += fill_dir * fill.quantity
         else:
             self.current_positions[fill.symbol] += fill_dir * fill.quantity
@@ -146,23 +145,23 @@ class Portfolio:
             latestPrice = latestPricesForFill[i]
             if cur_quantity == 0:
                 if s == 'LONG':
-                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity[i], latestPrice, direction='BUY') # ADD TUPLE AS ARG TO CREATE FILL WITH TUPLE
                 elif s == 'SHORT':
-                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='SELL')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity[i], latestPrice, direction='SELL')
 
             elif cur_quantity < 0:
                 if s == 'LONG':
-                    order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), latestPrice, direction='BUY')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity[i] + abs(cur_quantity)), latestPrice, direction='BUY')
                 elif s == 'SHORT':
-                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='SELL')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity[i], latestPrice, direction='SELL')
                 elif s == 'EXIT':
                     order = OrderEvent(datetime, tuple, symbol, order_type, abs(cur_quantity), latestPrice, direction='BUY')
             
             else:
                 if s == 'LONG':
-                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity, latestPrice, direction='BUY')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, order_quantity[i], latestPrice, direction='BUY')
                 elif s == 'SHORT':
-                    order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity + abs(cur_quantity)), latestPrice, direction='SELL')
+                    order = OrderEvent(datetime, tuple, symbol, order_type, (order_quantity[i] + abs(cur_quantity)), latestPrice, direction='SELL')
                 elif s == 'EXIT':
                     order = OrderEvent(datetime, tuple, symbol, order_type, abs(cur_quantity), latestPrice, direction='SHORT')
 

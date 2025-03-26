@@ -98,7 +98,7 @@ class NotAPairTrade(Strategy):
                             b.append('OUT')
 
                     # MODIFY ORDER QUANTITY BASED ON COINTEGRATION COEFFICIENT
-                    order_quantity = 1
+                    order_quantity = [0.1, 1]
 
                     signal = SignalEvent(tuple, dt, sig_dir, order_quantity, latestPriceForFill)
                     self.events.put(signal)

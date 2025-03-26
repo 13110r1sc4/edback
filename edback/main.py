@@ -5,8 +5,8 @@ from portfolio import Portfolio
 from execution import SimulatedExecutionHandler
 import datetime
 import matplotlib.pyplot as plt
-import pandas as pd
 from event import OrderEvent
+import matplotlib.dates as mdates
 
 def cleanUpPositions(symbol_tuple, bars, broker, port, events):
         '''check current pos -> close them with new order (if needed) -> fill order and update positions '''
@@ -67,13 +67,13 @@ def main():
     csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/"
 
     ############# YF ##############
-    useYf = False
+    useYf = True
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=35)
+    start_date  = end_date - datetime.timedelta(days=500)
 
     ######### STRATEGY ############
-    model_window = 30
+    model_window = 25
     ###############################
     
     bars = HistoricCSVDataHandler(events, csv_dir, symbol_tuple, intervals[0])
@@ -114,22 +114,20 @@ def main():
 
     print(f"Final Portfolio Value: ${port.current_holdings['cash']:.2f}")
     print(f"Total Return: {(port.current_holdings['cash'] / port.initial_capital - 1) * 100:.2f}%")
-    global df_h, df_p
-    df_h, df_p = port.get_portfolio_value_history()
-    
-    # CD = bars.checkData()
 
-    # df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+    df_h, df_p= port.get_portfolio_value_history()
+    print(df_h['total'].iloc[-1])
 
-    # plt.figure(figsize=(10, 5))
-    # plt.plot(df['datetime'], df['total'], label="Portfolio Value", color='blue')
-    # plt.xlabel("Time")
-    # plt.ylabel("Portfolio Value ($)")
-    # plt.title("Portfolio Value Over Time")
-    # plt.legend()
-    # plt.grid()
-    # plt.xticks(rotation=45)
-    # plt.show()
+    plt.figure(figsize=(12, 6))
+    plt.plot(df_h['datetime'].iloc[model_window:], df_h['total'].iloc[model_window:], label="Portfolio Value", color='blue')
+    plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator()) 
+    plt.xlabel("Time")
+    plt.ylabel("Portfolio Value ($)")
+    plt.title("Portfolio Value Over Time")
+    plt.legend()
+    plt.grid()
+    plt.xticks(rotation=45)
+    plt.show()
 
 if __name__ == "__main__":
     main()
