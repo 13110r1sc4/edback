@@ -70,7 +70,7 @@ def main():
     useYf = True
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=500)
+    start_date  = end_date - datetime.timedelta(days=100)
 
     ######### STRATEGY ############
     model_window = 25
@@ -116,7 +116,7 @@ def main():
     print(f"Total Return: {(port.current_holdings['cash'] / port.initial_capital - 1) * 100:.2f}%")
 
     df_h, df_p= port.get_portfolio_value_history()
-    print(df_h['total'].iloc[-1])
+    print(df_h.iloc[-1])
 
     plt.figure(figsize=(12, 6))
     plt.plot(df_h['datetime'].iloc[model_window:], df_h['total'].iloc[model_window:], label="Portfolio Value", color='blue')
