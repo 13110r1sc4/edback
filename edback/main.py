@@ -64,13 +64,13 @@ def main():
     ########### GENERAL ###########
     events       = queue.Queue()
     symbol_tuple = (("BTC-USD", "ETH-USD"),) # HAS TO BE TUPLE FOR DATA HANDLING
-    csv_dir      = "/Users/leonardorisca/Desktop/AT/propBT/data/"
+    csv_dir      = "./data/"
 
     ############# YF ##############
     useYf = True
     intervals   = ["1d"]
     end_date    = datetime.datetime.now()
-    start_date  = end_date - datetime.timedelta(days=100)
+    start_date  = end_date - datetime.timedelta(days=50)
 
     ######### STRATEGY ############
     model_window = 25
